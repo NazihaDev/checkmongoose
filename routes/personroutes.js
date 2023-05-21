@@ -1,6 +1,9 @@
-//Installing and setting up Mongoose:
-const mongoose = require('mongoose');
-`mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });`
+const express = require("express")
+const router = express.Router()
+const req = require("express/lib/request")
+const res =require("express/lib/response")
+const person = require("../Model/person")
+//les requetes:
 //Create a person with this prototype: 
 let peopleSchema = new mongoose.Schema({
     name:{type:String,required:true},
@@ -11,7 +14,7 @@ let Person = mongoose.model('Person',peopleSchema)
 
 //Create and Save a Record of a Model:
 var createAndSavePerson = function(done)
-let francesca =new Person ({name:'francesca',age:20,favoriteFoods:['sushi']})
+let  francesca =new Person ({name:'francesca',age:20,favoriteFoods:['sushi']})
 francesca.save((error,data) =>{
     if(error){
         console.log(error)
@@ -53,13 +56,6 @@ var findPeopleByName = function(personName,done){
     })
 };
 //Use model.findOne() to Return a Single Matching Document from Your Database
-/*Person.find({favoriteFoods:{$all:['prawns']}},(error,data) =>{
-    if(error){
-        console.log(error)
-    }else{
-        console.log(data)
-    }
-})*/
 var findOneByFood = function(food,done){
     Person.findOne({favoritefoods:{$all:['food']}},(error,result) =>{
         if(error){
@@ -98,3 +94,56 @@ var findEditThenSave = function(personId,done){
     })
 }
 //Perform New Updates on a Document Using model.findOneAndUpdate()
+var findAndUpdate = function (personName,done){
+    var aheToSet =20;
+    personName.findOneAndUpdate({name:personName},{age:ageToSet},{new:true},(error,updatedRecord) => {
+        if(error){
+            console.log(error)
+               }else{
+                done(null,deletedRecord)
+               }
+            })
+   
+
+};
+//Delete One Document Using model.findByIdAndRemove
+var removeById = function(personId,done){
+    Person.findByIdAndRemove(personId,(error,deletedRecord)=>{
+        if(error){
+            console.log(error)
+               }else{
+                done(null,updatedRecord)
+               }
+    
+    })
+};
+//MongoDB and Mongoose - Delete Many Documents with model.remove()
+var removeManyPeople = function(done){
+    var nameToRemove = "Mary";
+    Person.removeAllListeners({name:nameToRemove},(error,JSONStatus)=>{
+        if(error){
+            console.log(error)
+               }else{
+                done(null,JSONStatus)
+               }
+    
+    
+    })
+};
+//Chain Search Query Helpers to Narrow Search Results
+var queryChain =function(done){
+    var foodToSearch = "burrito"
+    Person.find({favoriteFoods:{$all:[foodToSearch]}})
+        .sort({name:'asc'})
+        .limit(2)
+        .select('-age')
+        .exec((error,filteredResults) =>{
+            if(error){
+                console.log(error)
+                   }else{
+                    done(null,filteredResults)
+                   }
+        
+        
+        })
+};
